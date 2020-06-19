@@ -14,16 +14,17 @@ import org.opencv.core.Mat;
 public class PinBallGame extends JFrame {
 	final static int Width=640;//画面の幅
 	final static int Height=382;//画面の高さ
-	static boolean gameover=false;
-	int xspeed=1;
-	int yspeed=1;
+	static boolean gameover=false;//ゲームオーバーの判定
+	int xspeed=1;//ボールのx座標のスピード
+	int yspeed=1;//ボールのy座標のスピード
 	static int barwidth=80;//フリッパーの幅
-	static int eyebox=50;
-	int ax[]=null;
-	int ay[]=null;
+	static int eyebox=50;//目の周りに配置する正方形の一辺の長さ
+	int ax[]=null;//
+	int ay[]=null;//
 	
 	BufferedImage image=null;
 	MyKeyAdapter mka=new MyKeyAdapter();
+	
 	Ball ball=new Ball();//ボール生成
 	Flipper flipper=new Flipper(Width / 2, 372,barwidth, 5);//フリッパー生成
 
@@ -53,7 +54,7 @@ public class PinBallGame extends JFrame {
 		this.setVisible(true);
 	}
 	public PinBallGame(int[] ax0,int[] ay0,Mat img) {//コンストラクタ引数あり
-		
+		//画像がある時
 		
 		int type = BufferedImage.TYPE_BYTE_GRAY; 
 		if (img.channels() > 1) {
@@ -71,13 +72,12 @@ public class PinBallGame extends JFrame {
 		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         System.arraycopy(b, 0, targetPixels, 0, b.length);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setTitle("PinBall");
-		this.setSize(Width, Height);
+		this.setTitle("PinBall");//タイトルバーのタイトル
+		this.setSize(Width, Height);//フレームのサイズを設定
 		this.setUndecorated(false);//タイトルバーとかtrue-off
 		
 		// キーリスナー
-		MyKeyAdapter myKeyAdapter = new MyKeyAdapter();
-		addKeyListener(myKeyAdapter);
+		addKeyListener(mka);
 
 		// タイマー
 		Timer timer = new java.util.Timer();
@@ -101,11 +101,8 @@ public class PinBallGame extends JFrame {
 		for(int i=0;i<ax.length;i++) {//目の数だけ四角を描く
 			g.drawRect(ax[i], ay[i], eyebox, eyebox);
 		}
-		ball.drawBall(g);
-	    // ターゲット描画
-		g.setColor(Color.green);
-		flipper.drawFlipper(g);
-		//g.draw(player);
+		ball.drawBall(g);//ボールの描画
+		flipper.drawFlipper(g);//フリッパーの描画
 		if(gameover==true) {
 			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, Width, Height);
@@ -120,28 +117,22 @@ public class PinBallGame extends JFrame {
 	TimerTask task=new TimerTask() {
 		@Override
 		public void run() {
-			int barx=flipper.x;
+			int barx=flipper.x;//フリッパーの位置
 			int bary=flipper.y;
 			while (true) {			
 				ball.x = ball.x + xspeed;
 				ball.y=ball.y+yspeed;
+				
 				if(ball.x >= Width-5){//右の枠に当たったら
-					ball.x = Width - 10;
 					xspeed *= -1;
 				}
 				if(ball.x <= 0){//左の枠に当たったら
-					ball.x = 5;
 					xspeed *= -1;
 				}
 				if(ball.y >= Height-5){//下の枠に当たったら
-					ball.y = Height - 10;
-					yspeed *= -1;
-					gameover=true;
-					
-					//ゲームオーバーして全てを終わらせる時
+					gameover=true;//ゲームオーバーして全てを終わらせる		
 				}
 				if(ball.y <= 17){//上の枠に当たったら
-					ball.y = 22;
 					yspeed *= -1;
 				}
 				for(int i=0;i<ax.length;i++) {//目の四角に当たったとき
@@ -159,14 +150,13 @@ public class PinBallGame extends JFrame {
 					}
 				}
 				if(ball.y==bary-5&&barx<ball.x+2.5&&ball.x+2.5<barx+barwidth) {//バーに当たったら
-					ball.y=bary-10;
 					yspeed *= -1;
 				}
-				if (mka.keyFlgs[mka.INDEX_OF_LEFT_KEY]&&barx>=0) {//左キーが押されたら
+				if (mka.keyFlgs[mka.LEFT_KEY]&&barx>=0) {//左キーが押されたら
 					barx -= 1;
 				}
 
-				if (mka.keyFlgs[mka.INDEX_OF_RIGHT_KEY]&&barx<=Width-barwidth) {//右キーが押されたら
+				if (mka.keyFlgs[mka.RIGHT_KEY]&&barx<=Width-barwidth) {//右キーが押されたら
 					barx += 1;
 				}
 				flipper.setLocation(barx, bary);
